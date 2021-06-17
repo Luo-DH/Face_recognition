@@ -20,12 +20,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private val TAG = "MainActivity"
         fun actionStart(context: Context) {
-            context.startActivity(
-                Intent(
-                    context,
-                    MainActivity::class.java
-                )
-            )
+            com.luo.base.actionStart<MainActivity>(context)
         }
     }
 

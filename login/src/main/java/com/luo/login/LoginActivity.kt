@@ -10,12 +10,7 @@ class LoginActivity : AppCompatActivity() {
 
     companion object {
         fun actionStart(context: Context) {
-            context.startActivity(
-                Intent(
-                    context,
-                    LoginActivity::class.java
-                )
-            )
+            com.luo.base.actionStart<LoginActivity>(context)
         }
     }
 
