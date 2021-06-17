@@ -1,4 +1,4 @@
-package com.luo.facerecognition
+package com.luo.base
 
 import android.annotation.SuppressLint
 import android.app.Application

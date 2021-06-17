@@ -1,9 +1,11 @@
 package com.luo.facerecognition
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.luo.base.FaceApplication
 import com.luo.login.LoginActivity
 
 /**
@@ -14,14 +16,24 @@ import com.luo.login.LoginActivity
  */
 class MainActivity : AppCompatActivity() {
 
-    private val TAG = "MainActivity"
+
+    companion object {
+        private val TAG = "MainActivity"
+        fun actionStart(context: Context) {
+            context.startActivity(
+                Intent(
+                    context,
+                    MainActivity::class.java
+                )
+            )
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
+        LoginActivity.actionStart(this)
         finish()
     }
 
