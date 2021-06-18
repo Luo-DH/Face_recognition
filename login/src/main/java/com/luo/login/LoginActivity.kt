@@ -6,9 +6,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.Button
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.luo.base.FaceApplication
 import com.luo.base.activity.ActivityController
 import com.luo.base.activity.BaseActivity
+import com.luo.base.showAlertDialog
 
 class LoginActivity : BaseActivity() {
 
@@ -21,6 +24,16 @@ class LoginActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
+        findViewById<Button>(R.id.login_btn_login).setOnClickListener {
+            showAlertDialog(
+                title = resources.getString(R.string.login_alert_title),
+                cancel = resources.getString(R.string.login_alert_cancel),
+                conform = resources.getString(R.string.login_alert_conform),
+            ) {
+                ActivityController.finishAll()
+            }
+        }
     }
 
     /**
@@ -36,7 +49,13 @@ class LoginActivity : BaseActivity() {
      * @return Boolean
      */
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        ActivityController.finishAll()
+        showAlertDialog(
+            title = resources.getString(R.string.login_alert_title),
+            cancel = resources.getString(R.string.login_alert_cancel),
+            conform = resources.getString(R.string.login_alert_conform),
+        ) {
+            ActivityController.finishAll()
+        }
         return super.onKeyDown(keyCode, event)
     }
 }

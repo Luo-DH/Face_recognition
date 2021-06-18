@@ -1,1 +1,5 @@
-<resources></resources>
+<resources>
+    <string name="login_alert_title">确定要退出应用吗</string>
+    <string name="login_alert_cancel">取消</string>
+    <string name="login_alert_conform">确认退出</string>
+</resources>

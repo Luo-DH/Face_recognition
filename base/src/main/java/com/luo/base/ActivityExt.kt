@@ -3,6 +3,9 @@ package com.luo.base
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.luo.base.activity.ActivityController
 import java.io.Serializable
 
 /**
@@ -14,4 +17,25 @@ inline fun <reified T> actionStart(context: Context) {
     context.startActivity(
         Intent(context, T::class.java)
     )
+}
+
+inline fun showAlertDialog(
+    title: String,
+    message: String = "",
+    cancel: String = "取消",
+    conform: String = "确认",
+    crossinline block: () -> Unit
+) {
+    MaterialAlertDialogBuilder(FaceApplication.context)
+        .setTitle(title)
+        .setMessage(message)
+        .setNeutralButton(cancel) { _, _ ->
+//            if (cancelBlock != null) {
+//                cancelBlock()
+//            }
+        }
+        .setPositiveButton(conform) { _, _ ->
+            block()
+        }
+        .show()
 }
