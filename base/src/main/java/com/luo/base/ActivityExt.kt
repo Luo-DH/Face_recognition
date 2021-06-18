@@ -1,11 +1,9 @@
 package com.luo.base
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.view.View
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import java.io.Serializable
 
 /**
  * @author: Luo-DH

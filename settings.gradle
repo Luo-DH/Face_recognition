@@ -2,3 +2,4 @@ rootProject.name = "FaceRecognition"
 include ':app'
 include ':login'
 include ':base'
+include ':down'

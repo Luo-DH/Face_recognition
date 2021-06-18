@@ -14,6 +14,7 @@ import com.google.android.material.dialog.MaterialDialogs
 import com.luo.base.activity.ActivityController
 import com.luo.base.activity.BaseActivity
 import com.luo.base.showMaterialAlertDialog
+import com.luo.down.DownActivity
 import com.luo.login.databinding.ActivityLoginBinding
 import com.luo.login.viewModel.LoginActivityViewModel
 
@@ -45,6 +46,11 @@ class LoginActivity : BaseActivity() {
         }
         binding.loginBtnLogin.setOnClickListener {
             loadingDialog = showLoading()
+
+            Handler().postDelayed({
+                DownActivity.actionStart(this)
+                finish()
+            }, 5_000)
         }
     }
 
