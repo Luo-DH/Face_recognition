@@ -3,6 +3,7 @@ package com.luo.base
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.Serializable
 
@@ -23,15 +24,25 @@ fun showMaterialAlertDialog(
     message: String = "",
     cancel: String = "取消",
     conform: String = "确认",
-    block: () -> Unit
-) {
+    canCancel: Boolean = true,
+    view: View? = null,
+    block: (() -> Unit)? = null
+) =
     MaterialAlertDialogBuilder(context)
         .setTitle(title)
         .setMessage(message)
         .setNeutralButton(cancel) { _, _ ->
         }
         .setPositiveButton(conform) { _, _ ->
-            block()
+            if (block != null) {
+                block()
+            }
         }
+        .setView(view)
         .show()
-}
+        .apply {
+            if (!canCancel) {
+                setCanceledOnTouchOutside(false)
+                setCancelable(false)
+            }
+        }

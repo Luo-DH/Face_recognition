@@ -1,14 +1,21 @@
 package com.luo.login
 
+import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.KeyEvent
+import android.view.View
 import android.widget.Button
+import androidx.activity.viewModels
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.dialog.MaterialDialogs
 import com.luo.base.activity.ActivityController
 import com.luo.base.activity.BaseActivity
 import com.luo.base.showMaterialAlertDialog
 import com.luo.login.databinding.ActivityLoginBinding
+import com.luo.login.viewModel.LoginActivityViewModel
 
 class LoginActivity : BaseActivity() {
 
@@ -19,6 +26,9 @@ class LoginActivity : BaseActivity() {
     }
 
     private lateinit var binding: ActivityLoginBinding
+    private lateinit var loadingDialog: Dialog
+
+    private val viewModel by viewModels<LoginActivityViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,12 +36,20 @@ class LoginActivity : BaseActivity() {
         setContentView(binding.root)
 
         setClickListener()
+        setObserver()
     }
 
     private fun setClickListener() {
         binding.loginBtnBack.setOnClickListener {
             this.backActivity()
         }
+        binding.loginBtnLogin.setOnClickListener {
+            loadingDialog = showLoading()
+        }
+    }
+
+    private fun setObserver() {
+
     }
 
     /**
@@ -56,4 +74,18 @@ class LoginActivity : BaseActivity() {
             ActivityController.finishAll()
         }
     }
+
+    /**
+     * 显示正在登陆dialog
+     */
+    private fun showLoading() =
+        showMaterialAlertDialog(
+            context = this,
+            title = "正在登陆",
+            conform = "取消登陆",
+            canCancel = false,
+            view = layoutInflater.inflate(R.layout.dialog_loading, null),
+            cancel = ""
+        )
+
 }
