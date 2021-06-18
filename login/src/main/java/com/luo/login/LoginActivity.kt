@@ -1,17 +1,14 @@
 package com.luo.login
 
 import android.content.Context
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.Button
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.luo.base.FaceApplication
 import com.luo.base.activity.ActivityController
 import com.luo.base.activity.BaseActivity
-import com.luo.base.showAlertDialog
+import com.luo.base.showMaterialAlertDialog
+import com.luo.login.databinding.ActivityLoginBinding
 
 class LoginActivity : BaseActivity() {
 
@@ -21,38 +18,20 @@ class LoginActivity : BaseActivity() {
         }
     }
 
-//    private lateinit var binding: ActivityLoginBinding
+    private lateinit var binding: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        binding = ActivityLoginBinding.inflate(layoutInflater)
-//        setContentView(binding.root)
-        setContentView(R.layout.activity_login)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // 设置点击监听
         setClickListener()
-        findViewById<Button>(R.id.login_btn_back).setOnClickListener {
-//            showAlertDialog(
-//                title = resources.getString(R.string.login_alert_title),
-//                cancel = resources.getString(R.string.login_alert_cancel),
-//                conform = resources.getString(R.string.login_alert_conform)
-//            ) {
-//                ActivityController.finishAll()
-//            }
-            Log.d(TAG, "onCreate: ")
-        }
     }
 
-    fun setClickListener() {
-//        binding.loginBtnBack.setOnClickListener {
-//            showAlertDialog(
-//                title = resources.getString(R.string.login_alert_title),
-//                cancel = resources.getString(R.string.login_alert_cancel),
-//                conform = resources.getString(R.string.login_alert_conform)
-//            ) {
-////                ActivityController.finishAll()
-//            }
-//        }
+    private fun setClickListener() {
+        binding.loginBtnBack.setOnClickListener {
+            this.backActivity()
+        }
     }
 
     /**
@@ -61,20 +40,20 @@ class LoginActivity : BaseActivity() {
      *  如果已经登陆了，需要退出登陆才能进来，
      *  因此在当前页面是不能够进行其他操作，
      *  所以用户在当前页面选择退出的情况下应该退出程序。
-     *
-     * 重写返回监听，退出所有activity
-     * @param keyCode Int
-     * @param event KeyEvent
-     * @return Boolean
      */
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        showAlertDialog(
-            title = resources.getString(R.string.login_alert_title),
-            cancel = resources.getString(R.string.login_alert_cancel),
-            conform = resources.getString(R.string.login_alert_conform),
+    override fun onBackPressed() {
+        this.backActivity()
+    }
+
+    /**
+     * 退出当前页面方法
+     */
+    private fun backActivity() {
+        showMaterialAlertDialog(
+            this,
+            message = resources.getString(R.string.login_alert_title)
         ) {
             ActivityController.finishAll()
         }
-        return super.onKeyDown(keyCode, event)
     }
 }
