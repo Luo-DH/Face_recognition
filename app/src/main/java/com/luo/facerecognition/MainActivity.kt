@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.luo.base.FaceApplication
+import com.luo.base.activity.BaseActivity
 import com.luo.login.LoginActivity
 
 /**
@@ -14,11 +15,10 @@ import com.luo.login.LoginActivity
  *  - 识别页面
  *  - 设置页面
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
 
     companion object {
-        private val TAG = "MainActivity"
         fun actionStart(context: Context) {
             com.luo.base.actionStart<MainActivity>(context)
         }
@@ -28,8 +28,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // 检查token，判断是否需要跳转到登陆页面
+        checkToken()
+        // 初始化UI
+        initUI()
+    }
+
+    private fun checkToken() {
         LoginActivity.actionStart(this)
-        finish()
+    }
+
+    private fun initUI() {
+
     }
 
     override fun onDestroy() {
