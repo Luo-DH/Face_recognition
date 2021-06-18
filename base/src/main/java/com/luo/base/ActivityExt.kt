@@ -19,23 +19,26 @@ inline fun <reified T> actionStart(context: Context) {
     )
 }
 
-inline fun showAlertDialog(
+fun Activity.showAlertDialog(
     title: String,
     message: String = "",
     cancel: String = "取消",
     conform: String = "确认",
-    crossinline block: () -> Unit
+    cancelBlock: (() -> Unit)? = null,
+    conformBlock: (() -> Unit)? = null
 ) {
     MaterialAlertDialogBuilder(FaceApplication.context)
         .setTitle(title)
         .setMessage(message)
         .setNeutralButton(cancel) { _, _ ->
-//            if (cancelBlock != null) {
-//                cancelBlock()
-//            }
+            if (cancelBlock != null) {
+                cancelBlock()
+            }
         }
         .setPositiveButton(conform) { _, _ ->
-            block()
+            if (conformBlock != null) {
+                conformBlock()
+            }
         }
         .show()
 }

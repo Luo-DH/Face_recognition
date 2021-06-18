@@ -21,19 +21,38 @@ class LoginActivity : BaseActivity() {
         }
     }
 
+//    private lateinit var binding: ActivityLoginBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        binding = ActivityLoginBinding.inflate(layoutInflater)
+//        setContentView(binding.root)
         setContentView(R.layout.activity_login)
 
-        findViewById<Button>(R.id.login_btn_login).setOnClickListener {
-            showAlertDialog(
-                title = resources.getString(R.string.login_alert_title),
-                cancel = resources.getString(R.string.login_alert_cancel),
-                conform = resources.getString(R.string.login_alert_conform),
-            ) {
-                ActivityController.finishAll()
-            }
+        // 设置点击监听
+        setClickListener()
+        findViewById<Button>(R.id.login_btn_back).setOnClickListener {
+//            showAlertDialog(
+//                title = resources.getString(R.string.login_alert_title),
+//                cancel = resources.getString(R.string.login_alert_cancel),
+//                conform = resources.getString(R.string.login_alert_conform)
+//            ) {
+//                ActivityController.finishAll()
+//            }
+            Log.d(TAG, "onCreate: ")
         }
+    }
+
+    fun setClickListener() {
+//        binding.loginBtnBack.setOnClickListener {
+//            showAlertDialog(
+//                title = resources.getString(R.string.login_alert_title),
+//                cancel = resources.getString(R.string.login_alert_cancel),
+//                conform = resources.getString(R.string.login_alert_conform)
+//            ) {
+////                ActivityController.finishAll()
+//            }
+//        }
     }
 
     /**

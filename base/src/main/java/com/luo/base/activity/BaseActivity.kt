@@ -15,6 +15,7 @@ open class BaseActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         TAG = this.localClassName
         ActivityController.addActivity(this)
+
     }
 
     override fun onDestroy() {
