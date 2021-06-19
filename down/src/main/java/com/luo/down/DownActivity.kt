@@ -27,10 +27,6 @@ class DownActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_down)
-        findViewById<TextView>(R.id.textView).setOnClickListener {
-            thread {
-                val dao = Test.getDao()
-            }
-        }
+
     }
 }

@@ -3,7 +3,10 @@
     package="com.luo.down">
 
     <application>
-        <activity android:name=".DownActivity"></activity>
+        <activity android:name=".DownActivity"
+            >
+
+        </activity>
     </application>
 
 </manifest>
