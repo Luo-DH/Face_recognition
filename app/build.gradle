@@ -56,6 +56,8 @@ dependencies {
     implementation project(':login')
     // 引入蓝牙模块
     implementation project(':blue')
+    // 引入人脸模块
+    implementation project(':face')
 
     def nav_version = "2.3.5"
 

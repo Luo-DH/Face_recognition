@@ -41,6 +41,7 @@ class MainFragment : Fragment() {
 
         // 设置点击监听
         setClickListener()
+//        RetinaFace.init(resources.assets)
     }
 
     private fun setClickListener() {
