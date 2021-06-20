@@ -20,7 +20,9 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import com.luo.base.BlueSocket
 import com.luo.blue.databinding.BlueFragmentBinding
 import java.util.*
 import kotlin.collections.ArrayList
@@ -140,6 +142,7 @@ class BlueFragment : Fragment() {
                     Int::class.javaPrimitiveType
                 )
             ).invoke(device, 1) as BluetoothSocket
+            BlueSocket.socket = socket
             blueAdapter.cancelDiscovery();//adapter为获取到的蓝牙适配器
             socket.connect()
 

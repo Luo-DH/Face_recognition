@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import com.luo.base.BlueSocket
 import com.luo.blue.BlueFragment
 import com.luo.face.RetinaFace
 import com.luo.face.other.Utils
@@ -59,7 +60,11 @@ class MainFragment : Fragment() {
         binding.mainBtnRecognize.setOnClickListener {
             findNavController().navigate(R.id.action_mainFragment_to_recognizeFragment)
         }
-        binding.mainBtnSetting.setOnClickListener {  }
+        binding.mainBtnSetting.setOnClickListener {
+            val os = BlueSocket.socket?.outputStream
+            os?.write("2".toByteArray())
+            os?.flush()
+        }
     }
 
 }

@@ -123,6 +123,8 @@ class MainRepository {
     fun readFromAssetsByName(context: Context, myMap: HashMap<String, Bitmap>) =
         myMap.apply {
             this["zeng"] = Utils.readFromAssets(context, "ZENG.png")!!
+            this["luo"] = Utils.readFromAssets(context, "LUO.jpg")!!
+            this["ldh"] = Utils.readFromAssets(context, "LDH.jpg")!!
 //            this["马家瑜"] = Utils.readFromAssets(context, "马家瑜.jpg")!!
         }
 

@@ -20,6 +20,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import com.google.common.util.concurrent.ListenableFuture
+import com.luo.base.BlueSocket
 import com.luo.face.module.BoxRetina
 import com.luo.face.other.toCropBitmap
 import com.luo.recognize.databinding.RecognizeFragmentBinding
@@ -76,7 +77,7 @@ class RecognizeFragment : Fragment() {
     private var lastBox2: BoxRetina? = null
 
     // 正常人脸阈值
-    private var threshold: Double = 0.7
+    private var threshold: Double = 0.5
 
     // 高分人脸阈值
     private var thresholdHigh: Double = 0.8
@@ -349,6 +350,15 @@ class RecognizeFragment : Fragment() {
         viewModel.finalName.observe(this.viewLifecycleOwner) {
             // 设置最终检测名字
             name = it
+            if (name == "Unknow") {
+                val os = BlueSocket.socket?.outputStream
+                os?.write("2".toByteArray())
+                os?.flush()
+            } else {
+                val os = BlueSocket.socket?.outputStream
+                os?.write("1".toByteArray())
+                os?.flush()
+            }
 
             // 显示结果的过程中不可识别
             canDetect = false
