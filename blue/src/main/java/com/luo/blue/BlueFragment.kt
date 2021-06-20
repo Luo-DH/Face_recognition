@@ -21,7 +21,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.luo.blue.databinding.BlueFragmentBinding
 import java.util.*
 import kotlin.collections.ArrayList
@@ -124,11 +123,19 @@ class BlueFragment : Fragment() {
             val clientThread = ClientThread(device)
             clientThread.start()
         }
+
+        binding.blueBtn.setOnClickListener {
+            val os = socket.outputStream
+            os.write("1".toByteArray())
+            os.flush()
+//            os.close()
+        }
     }
+    private lateinit var socket: BluetoothSocket
     inner class ClientThread(private val device: BluetoothDevice) : Thread() {
 
         override fun run() {
-            val socket = device.javaClass.getDeclaredMethod(
+            socket = device.javaClass.getDeclaredMethod(
                 "createRfcommSocket", *arrayOf<Class<*>?>(
                     Int::class.javaPrimitiveType
                 )
@@ -137,31 +144,12 @@ class BlueFragment : Fragment() {
             socket.connect()
 
             val os = socket.outputStream;//获取输出流
-            os?.write(ByteArray(123))
+            os?.write(1)
             os.flush();//将输出流的数据强制提交
-            os.close();//关闭输出流
+//            os.close();//关闭输出流
         }
 
     }
-
-//    fun applypermission() {
-//        if (Build.VERSION.SDK_INT >= 23) {
-//            //检查是否已经给了权限
-//            val checkpermission = ContextCompat.checkSelfPermission(
-//                ApplicationProvider.getApplicationContext<Context>(),
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            )
-//            if (checkpermission != PackageManager.PERMISSION_GRANTED) { //没有给权限
-//                Log.e("permission", "动态申请")
-//                //参数分别是当前活动，权限字符串数组，requestcode
-//                ActivityCompat.requestPermissions(
-//                    this@WiFiMainActivity,
-//                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-//                    1
-//                )
-//            }
-//        }
-//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
