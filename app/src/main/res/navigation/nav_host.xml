@@ -11,9 +11,16 @@
         <action
             android:id="@+id/action_mainFragment_to_blueFragment"
             app:destination="@id/blueFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_recognizeFragment"
+            app:destination="@id/recognizeFragment" />
     </fragment>
     <fragment
         android:id="@+id/blueFragment"
         android:name="com.luo.blue.BlueFragment"
         android:label="BlueFragment" />
+    <fragment
+        android:id="@+id/recognizeFragment"
+        android:name="com.luo.recognize.RecognizeFragment"
+        android:label="RecognizeFragment" />
 </navigation>
