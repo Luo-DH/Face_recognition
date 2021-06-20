@@ -1,12 +1,10 @@
 package com.luo.facerecognition
 
 import android.content.Context
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import com.luo.base.FaceApplication
 import com.luo.base.activity.BaseActivity
+import com.luo.facerecognition.databinding.ActivityMainBinding
 import com.luo.login.LoginActivity
 
 /**
@@ -24,14 +22,19 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // 检查token，判断是否需要跳转到登陆页面
         checkToken()
         // 初始化UI
         initUI()
+        // 设置点击监听
+        setClickListener()
     }
 
     private fun checkToken() {
@@ -39,7 +42,24 @@ class MainActivity : BaseActivity() {
     }
 
     private fun initUI() {
+//        supportFragmentManager.beginTransaction().replace(
+//            R.id.main_frg, MainFragment.newInstance()
+//        ).commit()
+    }
 
+    private fun setClickListener() {
+//        // 蓝牙连接
+//        binding.mainBtnBlue.setOnClickListener {
+////            BlueActivity.actionStart(this)
+//            val transaction = supportFragmentManager.beginTransaction()
+//            transaction.commit()
+//        }
+//        // 识别页面
+//        binding.mainBtnRecognize.setOnClickListener {
+//        }
+//        // 设置页面
+//        binding.mainBtnSetting.setOnClickListener {
+//        }
     }
 
     override fun onDestroy() {
