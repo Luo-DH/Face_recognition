@@ -17,6 +17,7 @@ import com.luo.down.databinding.ActivityDownBinding
 import com.luo.learnc01.face.ArcFace
 import com.luo.learnc01.face.RetinaFace2
 import com.luo.learnc01.others.Utils
+import com.luo.learnc01.others.toCropBitmap
 import com.luo.learnc01.others.toGetLandmarks
 
 import kotlin.concurrent.thread
@@ -71,13 +72,16 @@ class DownActivity : BaseActivity() {
                             resource: Bitmap,
                             transition: Transition<in Bitmap>?
                         ) {
-                            val res = RetinaFace2().detect(resource, 1f)[0]
-                            val resBitmap = Utils.cropBitmap(resource, res)
+                            val res = RetinaFace2().detect(resource, 1f)
+                            if (res.isEmpty()) {
+                                return
+                            }
+                            val resBitmap = res[0].toCropBitmap(resource)
                             val fea = ArcFace().getFeatureWithWrap2(
                                 Utils.getPixelsRGBA(resBitmap),
                                 resBitmap.width,
                                 resBitmap.height,
-                                res.toGetLandmarks()
+                                res[0].toGetLandmarks()
                             )
                             Face.faceDetail.add(
                                 FaceDetail(
@@ -94,6 +98,7 @@ class DownActivity : BaseActivity() {
                     })
                 }
 
+//                binding.downTv.text = Face.faceDetail.size.toString()
 
             }
         }

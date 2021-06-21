@@ -49,8 +49,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     implementation "androidx.activity:activity-ktx:1.2.3"
     implementation project(':base')
-    implementation project(':face')
-//    implementation project(':face2')
+//    implementation project(':face')
+    implementation project(':face2')
 
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'

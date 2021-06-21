@@ -1,16 +1,16 @@
 package com.luo.facerecognition
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.luo.base.BlueSocket
-import com.luo.blue.BlueFragment
 import com.luo.facerecognition.databinding.FragmentMainBinding
+import com.luo.learnc01.CameraActivity
 
 class MainFragment : Fragment() {
 
@@ -49,7 +49,8 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.action_mainFragment_to_blueFragment)
         }
         binding.mainBtnRecognize.setOnClickListener {
-            findNavController().navigate(R.id.action_mainFragment_to_recognizeFragment)
+//            findNavController().navigate(R.id.action_mainFragment_to_recognizeFragment)
+            startActivity(Intent(this.requireContext(), CameraActivity::class.java))
         }
         binding.mainBtnSetting.setOnClickListener {
             val os = BlueSocket.socket?.outputStream
