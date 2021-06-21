@@ -4,10 +4,17 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import com.luo.base.Test
 import com.luo.base.activity.BaseActivity
 import com.luo.base.db.entity.FaceFeature
-import kotlin.concurrent.thread
+import com.luo.base.net.FaceDetail
+import com.luo.base.net.ServiceCreator
+import com.luo.base.net.api.FaceService
+import retrofit2.Call
+
+import retrofit2.Callback
+import retrofit2.Response
 
 /**
  * 同步页面
@@ -28,5 +35,21 @@ class DownActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_down)
 
+        val api = ServiceCreator.create<FaceService>()
+
+        findViewById<TextView>(R.id.down_tv).setOnClickListener {
+            api.getAllFaces().enqueue(object : Callback<List<FaceDetail>> {
+                override fun onResponse(
+                    call: Call<List<FaceDetail>>,
+                    response: Response<List<FaceDetail>>
+                ) {
+                    Glide.with(this@DownActivity.applicationContext).load(response.body()?.get(0)?.imgUrl).into(findViewById(R.id.down_iv))
+                }
+
+                override fun onFailure(call: Call<List<FaceDetail>>, t: Throwable) {
+                }
+
+            })
+        }
     }
 }

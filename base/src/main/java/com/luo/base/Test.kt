@@ -11,5 +11,4 @@ object Test {
 
     fun getDao(): FaceDao =
         FaceDatabase.getDatabase().faceDao()
-
 }
