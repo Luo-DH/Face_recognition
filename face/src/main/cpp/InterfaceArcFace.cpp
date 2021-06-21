@@ -10,7 +10,7 @@
  */
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_luo_face_ArcFace_init(JNIEnv *env, jobject thiz, jobject manager) {
+Java_com_luo_learnc01_face_ArcFace_init(JNIEnv *env, jobject thiz, jobject manager) {
     AAssetManager *mgr = AAssetManager_fromJava(env, manager);
     ArcFace::face = new ArcFace(mgr);
 }
@@ -20,7 +20,7 @@ Java_com_luo_face_ArcFace_init(JNIEnv *env, jobject thiz, jobject manager) {
  */
 extern "C"
 JNIEXPORT jfloatArray JNICALL
-Java_com_luo_face_ArcFace_getFeature(JNIEnv *env, jobject thiz, jobject bitmap) {
+Java_com_luo_learnc01_face_ArcFace_getFeature(JNIEnv *env, jobject thiz, jobject bitmap) {
 
 
     ncnn::Mat in = ncnn::Mat::from_android_bitmap_resize(
@@ -55,7 +55,7 @@ Java_com_luo_face_ArcFace_getFeature(JNIEnv *env, jobject thiz, jobject bitmap) 
 
 extern "C"
 JNIEXPORT jfloat JNICALL
-Java_com_luo_face_ArcFace_calCosineDistance(JNIEnv *env, jobject thiz,
+Java_com_luo_learnc01_face_ArcFace_calCosineDistance(JNIEnv *env, jobject thiz,
                                                      jfloatArray feature1, jfloatArray feature2) {
 
 //
@@ -299,11 +299,65 @@ ncnn::Mat preprocess(ncnn::Mat img, int *info) {
     return out;
 }
 
-
+//ncnn::Mat preprocess(ncnn::Mat img, FaceInfo info)
+//{
+//    int image_w = 112; //96 or 112
+//    int image_h = 112;
+//
+//    float dst[10] = {30.2946, 65.5318, 48.0252, 33.5493, 62.7299,
+//                     51.6963, 51.5014, 71.7366, 92.3655, 92.2041};
+//
+//    if (image_w == 112)
+//        for (int i = 0; i < 5; i++)
+//            dst[i] += 8.0;
+//
+//    float src[10];
+//    for (int i = 0; i < 5; i++)
+//    {
+//        src[i] = info.landmark[2 * i];
+//        src[i + 5] = info.landmark[2 * i + 1];
+//    }
+//
+//    float M[6];
+//    getAffineMatrix(src, dst, M);
+//    ncnn::Mat out;
+//    warpAffineMatrix(img, out, M, image_w, image_h);
+//    return out;
+//}
 
 extern "C"
 JNIEXPORT jfloatArray JNICALL
-Java_com_luo_face_ArcFace_getFeatureWithWrap2(JNIEnv *env, jobject thiz,
+Java_com_luo_learnc01_face_ArcFace_getFeatureWithWrap(JNIEnv *env, jobject thiz, jobject bitmap,
+                                                      jintArray landmarks) {
+
+    ncnn::Mat in = ncnn::Mat::from_android_bitmap_resize(
+            env,
+            bitmap,
+            ncnn::Mat::PIXEL_RGBA2RGB,
+            112,
+            112);
+
+    // 得到五个人脸坐标点
+    jint *mtcnn_landmarks = env->GetIntArrayElements(landmarks, NULL);
+
+    int *mtcnnLandmarks = (int *) mtcnn_landmarks;
+
+    // 人脸对齐
+    ncnn::Mat inputImg = preprocess(in, mtcnnLandmarks);
+
+    vector<float> faceFeature = ArcFace::face->getFeature(inputImg);
+
+
+    // 新建一个float类型的数组用于转换
+    jfloatArray faceFeatureArray = env->NewFloatArray(faceFeature.size());
+    env->SetFloatArrayRegion(faceFeatureArray, 0, faceFeature.size(), faceFeature.data());
+
+    return faceFeatureArray;
+}
+
+extern "C"
+JNIEXPORT jfloatArray JNICALL
+Java_com_luo_learnc01_face_ArcFace_getFeatureWithWrap2(JNIEnv *env, jobject thiz,
                                                        jbyteArray face_date, jint w, jint h,
                                                        jintArray landmarks) {
     jbyte *faceDate = env->GetByteArrayElements(face_date, NULL);
@@ -335,7 +389,7 @@ Java_com_luo_face_ArcFace_getFeatureWithWrap2(JNIEnv *env, jobject thiz,
 
 extern "C"
 JNIEXPORT jdouble JNICALL
-Java_com_luo_face_ArcFace_compareFeature(JNIEnv *env_db, jobject thiz_db,
+Java_com_luo_learnc01_face_ArcFace_compareFeature(JNIEnv *env_db, jobject thiz_db,
                                                   jfloatArray feature1_db,
                                                   jfloatArray feature2_db) {
     jfloat *featureData1_db = (jfloat *) env_db->GetFloatArrayElements(feature1_db, 0);
@@ -355,4 +409,10 @@ Java_com_luo_face_ArcFace_compareFeature(JNIEnv *env_db, jobject thiz_db,
     env_db->ReleaseFloatArrayElements(feature1_db, featureData1_db, 0);
     env_db->ReleaseFloatArrayElements(feature2_db, featureData2_db, 0);
     return score_db;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_luo_learnc01_face_RetinaFace2_test(JNIEnv *env, jobject thiz, jobject bitmap) {
+    ncnn::Mat in = ncnn::Mat::from_android_bitmap(env, bitmap, ncnn::Mat::PIXEL_BGR) ;
 }

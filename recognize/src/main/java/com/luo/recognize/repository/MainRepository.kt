@@ -3,18 +3,44 @@ package com.luo.recognize.repository
 import android.content.Context
 import android.graphics.*
 import androidx.camera.core.ImageProxy
-import com.luo.face.ArcFace
-import com.luo.face.RetinaFace
-import com.luo.face.module.BoxRetina
+import com.luo.base.face.Bbox
+import com.luo.base.face.Box
+import com.luo.base.face.DBMsg
+import com.luo.learnc01.face.ArcFace
+import com.luo.learnc01.face.RetinaFace2
+import com.luo.learnc01.others.Utils
 
-import com.luo.recognize.modules.Bbox
-import com.luo.recognize.modules.Box
-import com.luo.recognize.modules.DBMsg
-import com.luo.recognize.others.Utils
+
 import java.io.ByteArrayOutputStream
 
 class MainRepository {
 
+
+    /**
+     * 在bitmap上画出人脸框
+     */
+    fun drawBoxRects(mutableBitmap: Bitmap, box: Box?): Bitmap? {
+        if (box == null) {
+            return mutableBitmap
+        }
+        val canvas = Canvas(mutableBitmap)
+        val boxPaint = Paint()
+        boxPaint.alpha = 200
+        boxPaint.style = Paint.Style.STROKE
+        boxPaint.strokeWidth = 4 * mutableBitmap.width / 800.0f
+        boxPaint.textSize = 40 * mutableBitmap.width / 800.0f
+        boxPaint.color = Color.RED
+        boxPaint.style = Paint.Style.FILL
+
+        boxPaint.style = Paint.Style.STROKE
+        val rect = RectF(box.x1.toFloat(), box.y1.toFloat(), box.x2.toFloat(), box.y2.toFloat())
+        canvas.drawRect(rect, boxPaint)
+        box.landmarks.forEach {
+            canvas.drawCircle(it.x, it.y, 5F, boxPaint)
+        }
+
+        return mutableBitmap
+    }
 
     /**
      * 在bitmap上画出人脸框
@@ -40,32 +66,6 @@ class MainRepository {
         canvas.drawCircle(box.landmark5, box.landmark6, 3F, boxPaint)
         canvas.drawCircle(box.landmark7, box.landmark8, 4F, boxPaint)
         canvas.drawCircle(box.landmark9, box.landmark10, 5F, boxPaint)
-        return mutableBitmap
-    }
-
-    /**
-     * 在bitmap上画出人脸框
-     */
-    fun drawBoxRects(mutableBitmap: Bitmap, box: BoxRetina?): Bitmap? {
-        if (box == null) {
-            return mutableBitmap
-        }
-        val canvas = Canvas(mutableBitmap)
-        val boxPaint = Paint()
-        boxPaint.alpha = 200
-        boxPaint.style = Paint.Style.STROKE
-        boxPaint.strokeWidth = 4 * mutableBitmap.width / 800.0f
-        boxPaint.textSize = 40 * mutableBitmap.width / 800.0f
-        boxPaint.color = Color.RED
-        boxPaint.style = Paint.Style.FILL
-
-        boxPaint.style = Paint.Style.STROKE
-        val rect = RectF(box.x1.toFloat(), box.y1.toFloat(), box.x2.toFloat(), box.y2.toFloat())
-        canvas.drawRect(rect, boxPaint)
-        box.landmarks.forEach {
-            canvas.drawCircle(it.x, it.y, 5F, boxPaint)
-        }
-
         return mutableBitmap
     }
 
@@ -130,7 +130,7 @@ class MainRepository {
 
 
     fun detectDataBaseFaceRetina2(bitmap: Bitmap) =
-        RetinaFace.detect(bitmap, 1f).let { box ->
+        RetinaFace2().detect(bitmap, 1f).let { box ->
             box.maxByOrNull { (it.x2 - it.x1) * (it.y2 - it.y1) }
         }
 
@@ -147,7 +147,7 @@ class MainRepository {
     fun getDataBaseFeatureAndBitmap2(
         bitmap: Bitmap, landmarks: IntArray
     ) =
-        ArcFace.getFeatureWithWrap2(
+        ArcFace().getFeatureWithWrap2(
             Utils.getPixelsRGBA(bitmap),
             bitmap.width,
             bitmap.height,

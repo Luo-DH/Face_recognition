@@ -2,7 +2,6 @@
 // Created by LDH on 12/22/20.
 //
 #include "ArcFace.hpp"
-#include <opencv2/core.hpp>
 #include "cpu.h"
 
 #define TAG "MtcnnSo"
@@ -10,23 +9,21 @@
 
 ArcFace *ArcFace::face = nullptr;
 
-//#define USE_GPU
+//static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
+//static ncnn::PoolAllocator g_workspace_pool_allocator;
 
-#ifdef USE_GPU
-static ncnn::UnlockedPoolAllocator *blob_pool_allocator = 0;
-static ncnn::UnlockedPoolAllocator *workspace_pool_allocator = 0;
+static ncnn::UnlockedPoolAllocator* blob_pool_allocator = 0;
+static ncnn::UnlockedPoolAllocator* workspace_pool_allocator = 0;
 
-static ncnn::VulkanDevice *vkdev = 0;
-static ncnn::VkBlobAllocator *blob_vkallocator = 0;
-static ncnn::VkStagingAllocator *staging_vkallocator = 0;
-#endif
+static ncnn::VulkanDevice* vkdev = 0;
+static ncnn::VkBlobAllocator* blob_vkallocator = 0;
+static ncnn::VkStagingAllocator* staging_vkallocator = 0;
+
 ArcFace::ArcFace(AAssetManager *mgr) {
 
-#ifdef USE_GPU
-    // ***********************开启gpu加速***********************
     ncnn::Option opt;
     opt.lightmode = true;
-    opt.num_threads = 2;
+    opt.num_threads = 4;
 
     blob_pool_allocator = new ncnn::UnlockedPoolAllocator;
     workspace_pool_allocator = new ncnn::UnlockedPoolAllocator;
@@ -50,29 +47,43 @@ ArcFace::ArcFace(AAssetManager *mgr) {
 
     opt.use_vulkan_compute = true;
 
-//    opt.use_fp16_packed = true;
-//    opt.use_fp16_storage = true;
-//    opt.use_fp16_arithmetic = true;
-//    opt.use_int8_storage = true;
-//    opt.use_int8_arithmetic = false;
-//
-//    opt.use_shader_pack8 = true;
-//
-//    opt.use_bf16_storage = true;
+    opt.use_fp16_packed = true;
+    opt.use_fp16_storage = true;
+    opt.use_fp16_arithmetic = true;
+    opt.use_int8_storage = true;
+    opt.use_int8_arithmetic = false;
+
+    opt.use_shader_pack8 = true;
+
+    opt.use_bf16_storage = true;
 
     ncnn::set_cpu_powersave(0);
+
+
+
+
+
+
+
+//    opt.blob_allocator = &g_blob_pool_allocator;
+//    opt.workspace_allocator = &g_workspace_pool_allocator;
+
+
+
+
+
+
 
     // use vulkan compute
     if (ncnn::get_gpu_count() != 0)
         opt.use_vulkan_compute = true;
 
     this->net.opt = opt;
-    // ***********************开启gpu加速***********************
-#endif
-
+//    149841611920279_.pic_hd.jpg149841611920279_.pic_hd.jpg
 
     const char *param = "mobilefacenet.param";
     const char *bin = "mobilefacenet.bin";
+
 
     this->net.opt.use_vulkan_compute = true;
 //    this->net.opt.use_int8_arithmetic = true;
@@ -124,7 +135,7 @@ vector<float> ArcFace::getFeature(ncnn::Mat in) {
 //    in = bgr2rgb(in);
     ncnn::Extractor ex = net.create_extractor();
     ex.set_light_mode(true);
-    ex.set_num_threads(2);
+//    ex.set_num_threads(2);
 //    ex.set_vulkan_compute(true);
     ex.input("data", in);
     ncnn::Mat out;
@@ -147,18 +158,6 @@ float calcSimilar(std::vector<float> feature1, std::vector<float> feature2) {
     return sim;
 }
 
-/**
- * This is a normalize function before calculating the cosine distance. Experiment has proven it can destory the
- * original distribution in order to make two feature more distinguishable.
- * mean value is set to 0 and std is set to 1
- */
-cv::Mat Zscore(const cv::Mat &fc) {
-    cv::Mat mean, std;
-    meanStdDev(fc, mean, std);
-    //cout <<"mean is :"<< mean <<"std is :"<< std << endl;
-    cv::Mat fc_norm = (fc - mean) / std;
-    return fc_norm;
-}
 
 double calculSimilar(std::vector<float>& v1, std::vector<float>& v2, int distance_metric) {
     if (v1.size() != v2.size() || !v1.size())
@@ -181,17 +180,6 @@ double calculSimilar(std::vector<float>& v1, std::vector<float>& v2, int distanc
     }
     return dist;
 }
-
-/**
- * This module is using to computing the cosine distance between input feature and ground truth feature
- *  */
-inline float CosineDistance(const cv::Mat &v1, const cv::Mat &v2) {
-    double dot = v1.dot(v2);
-    double denom_v1 = norm(v1);
-    double denom_v2 = norm(v2);
-    return dot / (denom_v1 * denom_v2);
-}
-
 
 
 //// 人脸对其
@@ -217,7 +205,3 @@ inline float CosineDistance(const cv::Mat &v1, const cv::Mat &v2) {
 //    warpAffineMatrix(img, out, M, image_w, image_h);
 //    return out;
 //}
-
-
-
-

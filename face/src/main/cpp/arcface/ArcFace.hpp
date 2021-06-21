@@ -9,13 +9,10 @@
 #include <vector>
 #include <string>
 #include "net.h"
-#include <opencv2/opencv.hpp>
 
 using namespace std;
 float calcSimilar(std::vector<float> feature1, std::vector<float> feature2);
-cv::Mat Zscore(const cv::Mat &fc);
 double calculSimilar(std::vector<float>& v1, std::vector<float>& v2, int distance_metric);
-inline float CosineDistance(const cv::Mat &v1, const cv::Mat &v2);
 
 class ArcFace {
 

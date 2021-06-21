@@ -57,7 +57,7 @@ dependencies {
     // 引入蓝牙模块
     implementation project(':blue')
     // 引入人脸模块
-    implementation project(':face')
+//    implementation project(':face')
     // 引入识别页面模块
     implementation project(':recognize')
 

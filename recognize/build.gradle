@@ -61,6 +61,7 @@ dependencies {
     implementation "androidx.camera:camera-view:1.0.0-alpha12"
 
     implementation project(':face')
+//    implementation project(':face2')
 
 
     // Lifecycle

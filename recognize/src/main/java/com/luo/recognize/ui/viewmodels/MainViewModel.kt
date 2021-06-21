@@ -7,17 +7,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luo.face.ArcFace
-import com.luo.face.RetinaFace
-import com.luo.face.module.BoxRetina
-import com.luo.face.module.FaceDetail
-import com.luo.face.other.toCropBitmap
-import com.luo.face.other.toGetLandmarks
+import com.luo.base.face.Bbox
+import com.luo.base.face.Box
+import com.luo.base.face.DBMsg
+import com.luo.base.face.FaceDetail
+import com.luo.learnc01.face.ArcFace
+import com.luo.learnc01.face.RetinaFace2
+import com.luo.learnc01.others.Utils
+import com.luo.learnc01.others.toCropBitmap
+import com.luo.learnc01.others.toGetLandmarks
 
-import com.luo.recognize.modules.Bbox
-import com.luo.recognize.modules.Box
-import com.luo.recognize.modules.DBMsg
-import com.luo.recognize.others.Utils
 import com.luo.recognize.repository.MainRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -38,8 +37,8 @@ class MainViewModel(
     val detectBox: LiveData<Array<Bbox>> = _detectBox
 
     // 人脸检测后的人脸框
-    private val _detectBox2 = MutableLiveData<List<BoxRetina>>()
-    val detectBox2: LiveData<List<BoxRetina>> = _detectBox2
+    private val _detectBox2 = MutableLiveData<List<Box>>()
+    val detectBoxOrigin2: LiveData<List<Box>> = _detectBox2
 
     // 人脸识别耗时
     private val _faceCast = MutableLiveData<Long>().apply { postValue(0L) }
@@ -90,9 +89,9 @@ class MainViewModel(
 
     init {
         _loading.postValue(true)
-        com.luo.face.ArcFace.init(context.assets)
-        RetinaFace.init(context.assets)
-        getDataFromAssets()
+        ArcFace().init(context.assets)
+        RetinaFace2().init(context.assets)
+//        getDataFromAssets()
     }
 
     /**
@@ -109,7 +108,7 @@ class MainViewModel(
             val start = System.currentTimeMillis()
             val smallBitmap = Utils.scaleBitmap(bitmap, 0.5f)!!
             _detectBox2.postValue(
-                RetinaFace.detect(bitmap, 4f)
+                RetinaFace2().detect(bitmap, 4f)
             )
 //            _detectBox.postValue(
 //                MTCNN().detect(
@@ -128,36 +127,35 @@ class MainViewModel(
      * 人脸检测方法
      *      根据上一帧人脸框的位置来检测，可能可以加快检测速度
      * @param bitmap: 将要检测人脸的图片，Bitmap格式
-     * @param box: 上一帧人脸框信息，如果没有人脸则为null
+     * @param boxOrigin: 上一帧人脸框信息，如果没有人脸则为null
      */
-    fun detectFace2(bitmap: Bitmap, box: BoxRetina?) {
+    fun detectFace2(bitmap: Bitmap, box: Box?) {
         val start = System.currentTimeMillis()
         detectFaceBackGround2(bitmap, box)
         val end = System.currentTimeMillis()
         _detectCast.postValue((end - start).toInt())    // 计算耗时
     }
 
-    private fun detectFaceBackGround2(bitmap: Bitmap, box: BoxRetina?) {
+    private fun detectFaceBackGround2(bitmap: Bitmap, box: Box?) {
         // 裁剪bitmap
         val cropBitmap = Utils.cropBitmap(bitmap, box)
-        val smallBitmap = Utils.scaleBitmap(cropBitmap, 0.25f)!!
+        val smallBitmap = Utils.scaleBitmap(cropBitmap, 1f)!!
         val rect = FloatArray(2)
         if (box != null) {
             rect[0] = (box.x1 - 30).coerceAtLeast(0).toFloat()
             rect[1] = (box.y1 - 30).coerceAtLeast(0).toFloat()
 
             _detectBox2.postValue(
-                RetinaFace.detectWithROI(smallBitmap, 4f, rect)
+                RetinaFace2().detectWithROI(smallBitmap, 1f, rect)
             )
         } else {
 
             _detectBox2.postValue(
-                RetinaFace.detect(smallBitmap, 4f)
+                RetinaFace2().detect(smallBitmap, 1f)
             )
         }
 
     }
-
     /**
      * 人脸识别，获得单个人脸特征值
      */
@@ -165,7 +163,7 @@ class MainViewModel(
         viewModelScope.launch {
             val start = System.currentTimeMillis()
             _feature.postValue(
-                ArcFace.getFeatureWithWrap2(
+                ArcFace().getFeatureWithWrap2(
                     Utils.getPixelsRGBA(bitmap), bitmap.width, bitmap.height, landmarks
                 )
             )
@@ -181,14 +179,20 @@ class MainViewModel(
     fun drawBoxRects(bitmap: Bitmap, result: Bbox) {
         _bitmapRes.postValue(repository.drawBoxRects(bitmap, result))
     }
+//
+//    /**
+//     * 绘制人脸框
+//     */
+//    fun drawBoxRects(bitmap: Bitmap, result: BoxRetina?) {
+//        _bitmapRes.postValue(repository.drawBoxRects(bitmap, result))
+//    }
 
     /**
      * 绘制人脸框
      */
-    fun drawBoxRects(bitmap: Bitmap, result: BoxRetina?) {
+    fun drawBoxRects(bitmap: Bitmap, result: Box?) {
         _bitmapRes.postValue(repository.drawBoxRects(bitmap, result))
     }
-
     /**
      * 把相机数据转换成bitmap
      */
@@ -266,7 +270,7 @@ class MainViewModel(
 
             _cosDist.postValue(HashMap<String, Float>().apply {
                 features.forEach {
-                    this[it.key] = ArcFace.calCosineDistance(feature, it.value.floatArray)
+                    this[it.key] = ArcFace().calCosineDistance(feature, it.value.floatArray)
 //                    this[it.key] = ArcFace().compareFeature(feature, it.value.floatArray).toFloat()
                 }
 
@@ -280,7 +284,7 @@ class MainViewModel(
 
             _cosDist.postValue(HashMap<String, Float>().apply {
                 faces.forEach {
-                    this[it.name] = ArcFace.calCosineDistance(feature, it.fea!!)
+                    this[it.name] = ArcFace().calCosineDistance(feature, it.fea!!)
                 }
 //                features.forEach {
 //                    this[it.key] = ArcFace.calCosineDistance(feature, it.value.floatArray)

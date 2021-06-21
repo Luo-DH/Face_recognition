@@ -1,11 +1,8 @@
 package com.luo.recognize
 
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.RectF
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.os.Handler
 import android.util.Size
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -17,19 +14,15 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleOwner
 import com.apkfuns.logutils.LogUtils
 import com.google.common.util.concurrent.ListenableFuture
-import com.luo.base.BlueSocket
-import com.luo.face.Face
-import com.luo.face.module.BoxRetina
-import com.luo.face.other.toCropBitmap
+import com.luo.base.face.Box
+import com.luo.base.face.DBMsg
+import com.luo.base.face.Face
+import com.luo.learnc01.others.toCropBitmap
+import com.luo.learnc01.others.toGetLandmarks
+import com.luo.learnc01.others.toRotaBitmap
 import com.luo.recognize.databinding.RecognizeFragmentBinding
-import com.luo.recognize.modules.Bbox
-import com.luo.recognize.modules.Box
-import com.luo.recognize.modules.DBMsg
-import com.luo.recognize.others.toRotaBitmap
 import com.luo.recognize.repository.MainRepository
 import com.luo.recognize.ui.viewmodels.MainViewModel
 import com.luo.recognize.ui.viewmodels.MainViewModelFactory
@@ -75,8 +68,7 @@ class RecognizeFragment : Fragment() {
     private lateinit var name: String
 
     // 当前帧人脸框信息，没有检测到人脸就是空
-    private var lastBox: Bbox? = null
-    private var lastBox2: BoxRetina? = null
+    private var lastBoxOrigin2: Box? = null
 
     // 正常人脸阈值
     private var threshold: Double = 0.5
@@ -190,7 +182,7 @@ class RecognizeFragment : Fragment() {
                 rotaBitmap = bitmap.toRotaBitmap()
 
                 // 人脸检测
-                activityViewModel.detectFace2(rotaBitmap, lastBox2)
+                activityViewModel.detectFace2(rotaBitmap, lastBoxOrigin2)
 
             })
         }
@@ -202,14 +194,12 @@ class RecognizeFragment : Fragment() {
      */
     private fun setupObserver() {
 
-
         /**
          * 人脸识别获得数据
          *      获得数据后，和数据库进行比对
          */
         viewModel.feature.observe(viewLifecycleOwner) {
             // 进行人脸比对
-//            viewModel.calCosineDistance(it, dbFeaturesWithBitmap)
             viewModel.calCosineDistance(it, Face.faceDetail)
         }
 
@@ -249,136 +239,129 @@ class RecognizeFragment : Fragment() {
             binding.textView.text = "人脸识别耗时: ${it} ms"
         }
 
-//        // 人脸检测获得数据
-//        viewModel.detectBox.observe(this) {
-//            val mutableBitmap = rotaBitmap.copy(Bitmap.Config.ARGB_8888, true)
-//            analysisBitmap(mutableBitmap, it)
-//        }
         // 人脸检测获得数据
-        viewModel.detectBox2.observe(this.viewLifecycleOwner) {
+        viewModel.detectBoxOrigin2.observe(this.viewLifecycleOwner) {
             val mutableBitmap = rotaBitmap.copy(Bitmap.Config.ARGB_8888, true)
             analysisBitmap(mutableBitmap, it)
         }
 
-        // 人脸检测时间检测
-        viewModel.detectCast.observe(this.viewLifecycleOwner) {
-            binding.valTxtView.text = "人脸监测耗时: ${it} ms"
-        }
+//        // 人脸检测时间检测
+//        viewModel.detectCast.observe(this.viewLifecycleOwner) {
+//            binding.valTxtView.text = "人脸监测耗时: ${it} ms"
+//        }
 
-        // 绘制人脸框检测
-        viewModel.bitmapRes.observe(this.viewLifecycleOwner) {
-            requireActivity().runOnUiThread {
-//                binding.imageView.visibility = View.VISIBLE
-                binding.imageView.setImageBitmap(it)
-
-            }
-        }
-
-        // 检测相机原始数据
-        viewModel.bitmapMeta.observe(this.viewLifecycleOwner) {
-
-            // 旋转图片
-            rotaBitmap = it.toRotaBitmap()
-
-            // 人脸检测
-            viewModel.detectFace(rotaBitmap)
-        }
-
-        // 是否在读取数据库
-        viewModel.loading.observe(this.viewLifecycleOwner) {
-            if (it) {
-//                binding.progressBar.visibility = View.VISIBLE
-                binding.imageView.visibility = View.GONE
-                binding.pvFinder.visibility = View.GONE
-            } else {
-//                binding.progressBar.visibility = View.GONE
-                binding.imageView.visibility = View.VISIBLE
-                binding.pvFinder.visibility = View.VISIBLE
-            }
-        }
-
-        // 数据库的人脸特征
-        viewModel.features.observe(this.viewLifecycleOwner) {
-            dbFeatures = it
-            val num = it.size
-            binding.dbNms.text = "数据库人脸数量：${num}"
-        }
-
-        // 数据库人脸加上图片
-        viewModel.featuresWithBitmap.observe(this.viewLifecycleOwner) {
-            dbFeaturesWithBitmap = it
-            binding.dbNms.text = "数据库人脸数量：${it.size}"
-        }
-
-        // 投票更新
-        viewModel.mapVote.observe(this.viewLifecycleOwner) { voteMap ->
-//            LogUtils.d("vote: ${voteMap}")
-
-            // 畅票
-            viewModel.voting(voteMap)
-
-        }
-
-        // 是否在畅票
-        viewModel.isVoting.observe(this.viewLifecycleOwner) {
-            if (it) { // 正在畅票
-
-            } else {
-                // 更新UI操作
-                GlobalScope.launch(Dispatchers.Main) {
-                    binding.boxPrediction.visibility = View.GONE
-                    binding.imageView2.visibility = View.VISIBLE
-                    binding.imageViewFinalBitmap.visibility = View.VISIBLE
-                    binding.finalName.visibility = View.VISIBLE
-                    binding.imageView2.setImageBitmap(dbFeaturesWithBitmap[name]?.bitmap)
-                    binding.imageViewFinalBitmap.setImageBitmap(dbFeaturesWithBitmap[name]?.bitmap)
-                    binding.tvName.text = "识别结果：$name"
-                    binding.tvNow.text = "识别结果：$name"
-                    if (dbFeaturesWithBitmap[name] != null) {
-                        binding.finalName.setTextColor(Color.GREEN)
-                        binding.finalName.text = "识别成功：$name"
-                    } else {
-                        binding.finalName.setTextColor(Color.RED)
-                        binding.finalName.text = "识别失败，请重试 ${name}"
-                    }
-                    Handler().postDelayed({
-                        canDetect = true
-                        binding.imageView2.visibility = View.GONE
-                        binding.imageViewFinalBitmap.visibility = View.GONE
-                        binding.finalName.visibility = View.GONE
-                    }, 2_000)
-                }
-            }
-        }
-
-        viewModel.finalName.observe(this.viewLifecycleOwner) {
-            // 设置最终检测名字
-            name = it
-//            if (name == "Unknow") {
-//                val os = BlueSocket.socket?.outputStream
-//                os?.write("2".toByteArray())
-//                os?.flush()
-//            } else {
-//                val os = BlueSocket.socket?.outputStream
-//                os?.write("1".toByteArray())
-//                os?.flush()
+//        // 绘制人脸框检测
+//        viewModel.bitmapRes.observe(this.viewLifecycleOwner) {
+//            requireActivity().runOnUiThread {
+//                binding.imageView.setImageBitmap(it)
 //            }
-
-            // 显示结果的过程中不可识别
-            canDetect = false
-
-            // 清空投票池
-            voteMap.clear()
-        }
-
-        /**
-         * 连续空帧观察，如果连续10帧是空的，则清空投票池
-         */
-        viewModel.emptyBox.observe(this.viewLifecycleOwner) {
-            if (it >= 10) {
-                voteMap.clear()
-            }
-        }
+//        }
+//
+//        // 检测相机原始数据
+//        viewModel.bitmapMeta.observe(this.viewLifecycleOwner) {
+//
+//            // 旋转图片
+//            rotaBitmap = it.toRotaBitmap()
+//
+//            // 人脸检测
+//            viewModel.detectFace(rotaBitmap)
+//        }
+//
+//        // 是否在读取数据库
+//        viewModel.loading.observe(this.viewLifecycleOwner) {
+//            if (it) {
+////                binding.progressBar.visibility = View.VISIBLE
+//                binding.imageView.visibility = View.GONE
+//                binding.pvFinder.visibility = View.GONE
+//            } else {
+////                binding.progressBar.visibility = View.GONE
+//                binding.imageView.visibility = View.VISIBLE
+//                binding.pvFinder.visibility = View.VISIBLE
+//            }
+//        }
+//
+//        // 数据库的人脸特征
+//        viewModel.features.observe(this.viewLifecycleOwner) {
+//            dbFeatures = it
+//            val num = it.size
+//            binding.dbNms.text = "数据库人脸数量：${num}"
+//        }
+//
+//        // 数据库人脸加上图片
+//        viewModel.featuresWithBitmap.observe(this.viewLifecycleOwner) {
+//            dbFeaturesWithBitmap = it
+//            binding.dbNms.text = "数据库人脸数量：${it.size}"
+//        }
+//
+//        // 投票更新
+//        viewModel.mapVote.observe(this.viewLifecycleOwner) { voteMap ->
+////            LogUtils.d("vote: ${voteMap}")
+//
+//            // 畅票
+//            viewModel.voting(voteMap)
+//
+//        }
+//
+//        // 是否在畅票
+//        viewModel.isVoting.observe(this.viewLifecycleOwner) {
+//            if (it) { // 正在畅票
+//
+//            } else {
+//                // 更新UI操作
+//                GlobalScope.launch(Dispatchers.Main) {
+//                    binding.boxPrediction.visibility = View.GONE
+//                    binding.imageView2.visibility = View.VISIBLE
+//                    binding.imageViewFinalBitmap.visibility = View.VISIBLE
+//                    binding.finalName.visibility = View.VISIBLE
+//                    binding.imageView2.setImageBitmap(dbFeaturesWithBitmap[name]?.bitmap)
+//                    binding.imageViewFinalBitmap.setImageBitmap(dbFeaturesWithBitmap[name]?.bitmap)
+//                    binding.tvName.text = "识别结果：$name"
+//                    binding.tvNow.text = "识别结果：$name"
+//                    if (dbFeaturesWithBitmap[name] != null) {
+//                        binding.finalName.setTextColor(Color.GREEN)
+//                        binding.finalName.text = "识别成功：$name"
+//                    } else {
+//                        binding.finalName.setTextColor(Color.RED)
+//                        binding.finalName.text = "识别失败，请重试 ${name}"
+//                    }
+//                    Handler().postDelayed({
+//                        canDetect = true
+//                        binding.imageView2.visibility = View.GONE
+//                        binding.imageViewFinalBitmap.visibility = View.GONE
+//                        binding.finalName.visibility = View.GONE
+//                    }, 2_000)
+//                }
+//            }
+//        }
+//
+//        viewModel.finalName.observe(this.viewLifecycleOwner) {
+//            // 设置最终检测名字
+//            name = it
+////            if (name == "Unknow") {
+////                val os = BlueSocket.socket?.outputStream
+////                os?.write("2".toByteArray())
+////                os?.flush()
+////            } else {
+////                val os = BlueSocket.socket?.outputStream
+////                os?.write("1".toByteArray())
+////                os?.flush()
+////            }
+//
+//            // 显示结果的过程中不可识别
+//            canDetect = false
+//
+//            // 清空投票池
+//            voteMap.clear()
+//        }
+//
+//        /**
+//         * 连续空帧观察，如果连续10帧是空的，则清空投票池
+//         */
+//        viewModel.emptyBox.observe(this.viewLifecycleOwner) {
+//            if (it >= 10) {
+//                voteMap.clear()
+//            }
+//        }
     }
 
     /**
@@ -438,7 +421,7 @@ class RecognizeFragment : Fragment() {
     /**
      * 处理人脸检测后得到的人脸框
      */
-    private fun analysisBitmap(bitmap: Bitmap, result: List<BoxRetina>) =
+    private fun analysisBitmap(bitmap: Bitmap, result: List<Box>) =
         binding.pvFinder.post {
             if (!canDetect) {
                 voteMap.clear()
@@ -448,8 +431,8 @@ class RecognizeFragment : Fragment() {
             if (result.isEmpty()) {
                 binding.boxPrediction.visibility = View.GONE
                 viewModel.drawBoxRects(bitmap, null)
-                lastBox = null
-                lastBox2 = null
+//                lastBox = null
+                lastBoxOrigin2 = null
                 viewModel.isEmptyBox(true)
                 return@post
             }
@@ -463,7 +446,7 @@ class RecognizeFragment : Fragment() {
 
             // 记录当前帧人脸框信息
 //            lastBox = box
-            lastBox2 = box
+            lastBoxOrigin2 = box
 
             val location = mapOutputCoordinates(
                 RectF().also {
@@ -498,7 +481,7 @@ class RecognizeFragment : Fragment() {
                 i += 1
             }
 
-            viewModel.getFeature(cropBitmap, landmarks)
+            viewModel.getFeature(cropBitmap, box.toGetLandmarks())
 
             // 绘制人脸框
             viewModel.drawBoxRects(bitmap, result.maxByOrNull { (it.x2 - it.x1) * (it.y2 - it.y1) }!!)

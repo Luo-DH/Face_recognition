@@ -5,27 +5,20 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
-import android.widget.TextView
 import androidx.activity.viewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.luo.base.Test
 import com.luo.base.activity.BaseActivity
-import com.luo.base.db.entity.FaceFeature
-import com.luo.base.net.FaceDetail
-import com.luo.base.net.ServiceCreator
-import com.luo.base.net.api.FaceService
+import com.luo.base.face.Face
+import com.luo.base.face.FaceDetail
 import com.luo.down.databinding.ActivityDownBinding
-import com.luo.face.ArcFace
-import com.luo.face.Face
-import com.luo.face.RetinaFace
-import com.luo.face.other.Utils
-import com.luo.face.other.toGetLandmarks
-import retrofit2.Call
 
-import retrofit2.Callback
-import retrofit2.Response
+import com.luo.learnc01.face.ArcFace
+import com.luo.learnc01.face.RetinaFace2
+import com.luo.learnc01.others.Utils
+import com.luo.learnc01.others.toGetLandmarks
+
 import kotlin.concurrent.thread
 
 /**
@@ -58,16 +51,13 @@ class DownActivity : BaseActivity() {
         // 设置数据监听
         setupObserver()
 
-        findViewById<TextView>(R.id.down_tv).setOnClickListener {
-            val res1 = ArcFace.calCosineDistance(Face.faceDetail[0].fea!!, Face.faceDetail[1].fea!!)
-            val res2 = ArcFace.compareFeature(Face.faceDetail[0].fea!!, Face.faceDetail[1].fea!!)
-            Log.d(TAG, "onCreate: ${res1} ==== $res2")
-        }
     }
 
     private fun initData() {
-        ArcFace.init(assets)
-        RetinaFace.init(assets)
+//        ArcFace.init(assets)
+//        RetinaFace.init(assets)
+        RetinaFace2().init(assets)
+        ArcFace().init(assets)
         viewModel.getAllFaces()
     }
 
@@ -81,19 +71,18 @@ class DownActivity : BaseActivity() {
                             resource: Bitmap,
                             transition: Transition<in Bitmap>?
                         ) {
-                            val res = RetinaFace.detect(resource, 1f)[0]
+                            val res = RetinaFace2().detect(resource, 1f)[0]
                             val resBitmap = Utils.cropBitmap(resource, res)
-                            val fea = ArcFace.getFeatureWithWrap2(
+                            val fea = ArcFace().getFeatureWithWrap2(
                                 Utils.getPixelsRGBA(resBitmap),
                                 resBitmap.width,
                                 resBitmap.height,
                                 res.toGetLandmarks()
                             )
                             Face.faceDetail.add(
-                                com.luo.face.module.FaceDetail(
+                                FaceDetail(
                                     name = face.name,
                                     fea = fea,
-                                    box = res,
                                     smallBitmap = Utils.scaleBitmap(resBitmap, .1f)!!
                                 )
                             )
@@ -104,6 +93,8 @@ class DownActivity : BaseActivity() {
 
                     })
                 }
+
+
             }
         }
     }
