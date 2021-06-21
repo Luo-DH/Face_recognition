@@ -11,5 +11,5 @@ import retrofit2.http.GET
 interface FaceService {
 
     @GET("get-all-faces")
-    fun getAllFaces(): Call<List<FaceDetail>>
+    suspend fun getAllFaces(): List<FaceDetail>
 }

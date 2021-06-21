@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.luo.face.ArcFace
 import com.luo.face.RetinaFace
 import com.luo.face.module.BoxRetina
+import com.luo.face.module.FaceDetail
 import com.luo.face.other.toCropBitmap
 import com.luo.face.other.toGetLandmarks
 
@@ -260,7 +261,9 @@ class MainViewModel(
      * 进行数据比对
      */
     fun calCosineDistance(feature: FloatArray, features: HashMap<String, DBMsg>) {
+
         GlobalScope.launch(Dispatchers.Default) {
+
             _cosDist.postValue(HashMap<String, Float>().apply {
                 features.forEach {
                     this[it.key] = ArcFace.calCosineDistance(feature, it.value.floatArray)
@@ -271,7 +274,23 @@ class MainViewModel(
         }
 
     }
+    fun calCosineDistance(feature: FloatArray, faces: List<FaceDetail>) {
 
+        GlobalScope.launch(Dispatchers.Default) {
+
+            _cosDist.postValue(HashMap<String, Float>().apply {
+                faces.forEach {
+                    this[it.name] = ArcFace.calCosineDistance(feature, it.fea!!)
+                }
+//                features.forEach {
+//                    this[it.key] = ArcFace.calCosineDistance(feature, it.value.floatArray)
+////                    this[it.key] = ArcFace().compareFeature(feature, it.value.floatArray).toFloat()
+//                }
+
+            })
+        }
+
+    }
 
     /**
      * 投票方法

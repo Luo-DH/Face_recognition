@@ -78,4 +78,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
 
     implementation project(':base')
+
+    implementation 'com.apkfuns.logutils:library:1.7.5'//Log打印工具
 }

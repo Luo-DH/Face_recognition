@@ -19,8 +19,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
+import com.apkfuns.logutils.LogUtils
 import com.google.common.util.concurrent.ListenableFuture
 import com.luo.base.BlueSocket
+import com.luo.face.Face
 import com.luo.face.module.BoxRetina
 import com.luo.face.other.toCropBitmap
 import com.luo.recognize.databinding.RecognizeFragmentBinding
@@ -207,7 +209,8 @@ class RecognizeFragment : Fragment() {
          */
         viewModel.feature.observe(viewLifecycleOwner) {
             // 进行人脸比对
-            viewModel.calCosineDistance(it, dbFeaturesWithBitmap)
+//            viewModel.calCosineDistance(it, dbFeaturesWithBitmap)
+            viewModel.calCosineDistance(it, Face.faceDetail)
         }
 
         /**
@@ -215,6 +218,7 @@ class RecognizeFragment : Fragment() {
          *      得到识别的人名
          */
         viewModel.cosDist.observe(this.viewLifecycleOwner) { results ->
+            LogUtils.d(results)
             val result = results.maxByOrNull{ it.value }!!
 
             /**
@@ -350,15 +354,15 @@ class RecognizeFragment : Fragment() {
         viewModel.finalName.observe(this.viewLifecycleOwner) {
             // 设置最终检测名字
             name = it
-            if (name == "Unknow") {
-                val os = BlueSocket.socket?.outputStream
-                os?.write("2".toByteArray())
-                os?.flush()
-            } else {
-                val os = BlueSocket.socket?.outputStream
-                os?.write("1".toByteArray())
-                os?.flush()
-            }
+//            if (name == "Unknow") {
+//                val os = BlueSocket.socket?.outputStream
+//                os?.write("2".toByteArray())
+//                os?.flush()
+//            } else {
+//                val os = BlueSocket.socket?.outputStream
+//                os?.write("1".toByteArray())
+//                os?.flush()
+//            }
 
             // 显示结果的过程中不可识别
             canDetect = false
