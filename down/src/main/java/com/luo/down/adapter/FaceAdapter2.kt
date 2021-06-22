@@ -20,7 +20,7 @@ import com.luo.down.databinding.ItemDownBinding
  * @author: Luo-DH
  * @date: 2021/6/21
  */
-class FaceAdapter : RecyclerView.Adapter<FaceAdapter.FaceViewHolder>() {
+class FaceAdapter2(val datas: List<FaceDetail>) : RecyclerView.Adapter<FaceAdapter2.FaceViewHolder>() {
 
     inner class FaceViewHolder(itemView: ItemDownBinding) : RecyclerView.ViewHolder(itemView.root) {
         val imageView = itemView.itemDownIv
@@ -39,7 +39,8 @@ class FaceAdapter : RecyclerView.Adapter<FaceAdapter.FaceViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: FaceViewHolder, position: Int) {
-        val data = faces[position]
+        Log.d("TAGonResourceReady", "onBindViewHolder: I am here")
+        val data = datas[position]
         holder.name.text = data.name
         Glide.with(FaceApplication.context).asBitmap().load(data.imgUrl).into(object : CustomTarget<Bitmap>() {
             override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
@@ -54,28 +55,8 @@ class FaceAdapter : RecyclerView.Adapter<FaceAdapter.FaceViewHolder>() {
 
     }
 
-    override fun getItemCount() = faces.size
-
-    private val diffCallback = object : DiffUtil.ItemCallback<FaceDetail>() {
-        override fun areItemsTheSame(oldItem: FaceDetail, newItem: FaceDetail): Boolean {
-            return oldItem.id == newItem.id
-        }
-
-        override fun areContentsTheSame(oldItem: FaceDetail, newItem: FaceDetail): Boolean {
-            return oldItem.hashCode() == newItem.hashCode()
-        }
-
+    override fun getItemCount(): Int {
+       return datas.size
     }
-
-
-    private val differ = AsyncListDiffer(this, diffCallback)
-
-    var faces: List<FaceDetail>
-        get() = differ.currentList
-        set(value) {
-            Log.d("hello", "${value}: ")
-            notifyDataSetChanged()
-            return differ.submitList(value)
-        }
 
 }

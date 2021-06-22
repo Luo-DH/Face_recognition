@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import com.luo.base.activity.BaseActivity
 import com.luo.facerecognition.databinding.ActivityMainBinding
+import com.luo.learnc01.face.ArcFace
+import com.luo.learnc01.face.RetinaFace2
 import com.luo.login.LoginActivity
 
 /**
@@ -39,6 +41,8 @@ class MainActivity : BaseActivity() {
 
     private fun checkToken() {
         LoginActivity.actionStart(this)
+        RetinaFace2().init(assets)
+        ArcFace().init(assets)
     }
 
     private fun initUI() {
