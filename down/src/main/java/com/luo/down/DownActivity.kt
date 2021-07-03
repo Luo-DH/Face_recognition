@@ -66,7 +66,8 @@ class DownActivity : BaseActivity() {
 
     private fun initData() {
 
-        viewModel.getAllFaces()
+//        viewModel.getAllFaces()
+        viewModel.getAllFacesFromAssets()
 
         binding.downRv.apply {
             this.adapter = faceAdapter
@@ -92,6 +93,25 @@ class DownActivity : BaseActivity() {
         }
         viewModel.faceDataas.observe(this) { faces ->
             faceAdapter.faces = faces
+        }
+        viewModel.facesFromAssets.observe(this) { faces ->
+            for (face in faces) {
+                val res = RetinaFace2().detect(face, 1f)
+                val resBitmap = res[0].toCropBitmap(face)
+                val fea = ArcFace().getFeatureWithWrap2(
+                    Utils.getPixelsRGBA(resBitmap),
+                    resBitmap.width,
+                    resBitmap.height,
+                    res[0].toGetLandmarks()
+                )
+                Face.faceDetail.add(
+                    com.luo.base.face.FaceDetail(
+                        name = "Luo",
+                        fea = fea,
+                        smallBitmap = Utils.scaleBitmap(resBitmap, .1f)!!
+                    )
+                )
+            }
         }
     }
 }

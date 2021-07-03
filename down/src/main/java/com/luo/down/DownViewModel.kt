@@ -29,6 +29,9 @@ class DownViewModel: ViewModel() {
     private val _faces = MutableLiveData<List<FaceDetail>>()
     val faces: LiveData<List<FaceDetail>> = _faces
 
+    private val _facesFromAssets = MutableLiveData<List<Bitmap>>()
+    val facesFromAssets: LiveData<List<Bitmap>> = _facesFromAssets
+
     private val _faceDatas = MutableLiveData<ArrayList<FaceDetail>>() .also { it.value = ArrayList<FaceDetail>() }
     val faceDataas: LiveData<ArrayList<FaceDetail>> = _faceDatas
 
@@ -39,6 +42,13 @@ class DownViewModel: ViewModel() {
         viewModelScope.launch {
             val res = DownRepository.getAllFaces()
             _faces.postValue(res)
+        }
+    }
+
+    fun getAllFacesFromAssets() {
+        viewModelScope.launch {
+            val res = DownRepository.getAllFacesFromAssets()
+            _facesFromAssets.postValue(res)
         }
     }
 

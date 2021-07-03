@@ -93,8 +93,8 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ArcFace().init(assets)
-        RetinaFace2().init(assets)
+//        ArcFace().init(assets)
+//        RetinaFace2().init(assets)
 
         // 初始化viewModel
         initViewModel()
@@ -230,7 +230,7 @@ class CameraActivity : AppCompatActivity() {
 
 //            val maxResult = result.maxBy { (it.x2 - it.x1) * (it.y2 - it.y1) }!!
 
-            val box = result.maxByOrNull{ (it.x2 - it.x1) * (it.y2 - it.y1) }!!
+            val box = result.maxByOrNull { (it.x2 - it.x1) * (it.y2 - it.y1) }!!
 //            val box = maxResult
 
 
@@ -260,7 +260,7 @@ class CameraActivity : AppCompatActivity() {
 
             val cropBitmap =
 //                maxResult.toCropBitmap(bitmap)
-                result.maxByOrNull{ (it.x2 - it.x1) * (it.y2 - it.y1) }!!.toCropBitmap(bitmap)
+                result.maxByOrNull { (it.x2 - it.x1) * (it.y2 - it.y1) }!!.toCropBitmap(bitmap)
 
 
             val landmarks = IntArray(10)
@@ -271,10 +271,65 @@ class CameraActivity : AppCompatActivity() {
                 i += 1
             }
 
-            viewModel.getFeature(cropBitmap, landmarks)
+            LogUtils.d(location.height() * location.width())
+            val area = location.height() * location.width()
+
+
+            if (area > 500000) {
+                if (location.centerX() < 450) {
+                    // 更新UI操作
+                    GlobalScope.launch(Dispatchers.Main) {
+                        binding.finalName.visibility = View.VISIBLE
+                        binding.finalName.setTextColor(Color.RED)
+                        binding.finalName.text = "请往👉"
+                    }
+                } else if (location.centerX() > 650) {
+                    // 更新UI操作
+                    GlobalScope.launch(Dispatchers.Main) {
+                        binding.finalName.visibility = View.VISIBLE
+                        binding.finalName.setTextColor(Color.RED)
+                        binding.finalName.text = "请往👈"
+                    }
+                } else {
+                    if (location.centerY() < 800) {
+                        // 更新UI操作
+                        GlobalScope.launch(Dispatchers.Main) {
+                            binding.finalName.visibility = View.VISIBLE
+                            binding.finalName.setTextColor(Color.RED)
+                            binding.finalName.text = "请往👇"
+                        }
+                    } else if (location.centerY() > 1300) {
+                        // 更新UI操作
+                        GlobalScope.launch(Dispatchers.Main) {
+                            binding.finalName.visibility = View.VISIBLE
+                            binding.finalName.setTextColor(Color.RED)
+                            binding.finalName.text = "请往👆"
+                        }
+                    } else {
+                        viewModel.getFeature(cropBitmap, landmarks)
+                        // 更新UI操作
+                        GlobalScope.launch(Dispatchers.Main) {
+                            binding.finalName.visibility = View.VISIBLE
+                            binding.finalName.setTextColor(Color.GREEN)
+                            binding.finalName.text = "正在识别"
+                        }
+                    }
+                }
+
+            } else {
+                // 更新UI操作
+                GlobalScope.launch(Dispatchers.Main) {
+                    binding.finalName.visibility = View.VISIBLE
+                    binding.finalName.setTextColor(Color.RED)
+                    binding.finalName.text = "距离太远，请靠近屏幕"
+                }
+            }
 
             // 绘制人脸框
-            viewModel.drawBoxRects(bitmap, result.maxByOrNull{ (it.x2 - it.x1) * (it.y2 - it.y1) }!!)
+            viewModel.drawBoxRects(
+                bitmap,
+                result.maxByOrNull { (it.x2 - it.x1) * (it.y2 - it.y1) }!!
+            )
 //            viewModel.drawBoxRects(bitmap, maxResult)
         }
 
@@ -304,7 +359,7 @@ class CameraActivity : AppCompatActivity() {
          *      得到识别的人名
          */
         viewModel.cosDist.observe(this) { results ->
-            val result = results.maxByOrNull{ it.value }!!
+            val result = results.maxByOrNull { it.value }!!
 
             /**
              * 获得名字后，投票加一
@@ -420,7 +475,7 @@ class CameraActivity : AppCompatActivity() {
                     binding.imageViewFinalBitmap.setImageBitmap(dbFeaturesWithBitmap[name]?.bitmap)
                     binding.tvName.text = "识别结果：$name"
                     binding.tvNow.text = "识别结果：$name"
-                    if (Face.faceDetail.map { it.name }.indexOf(name) > 0) {
+                    if (Face.faceDetail.map { it.name }.indexOf(name) >= 0) {
                         binding.finalName.setTextColor(Color.GREEN)
                         binding.finalName.text = "识别成功：$name"
                         val os = BlueSocket.socket?.outputStream

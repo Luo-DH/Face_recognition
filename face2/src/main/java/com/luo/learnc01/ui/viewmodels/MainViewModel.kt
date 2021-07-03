@@ -329,7 +329,7 @@ class MainViewModel(
     fun voting(voteMap: HashMap<String, Int>) {
         viewModelScope.launch {
             val result = voteMap.maxByOrNull{ it.value }
-            if (result == null || result.value < 8) {
+            if (result == null || result.value < 15) {
                 _isVoting.postValue(true)
             } else {
                 _finalName.postValue(result.key) // 设置最后的名字
